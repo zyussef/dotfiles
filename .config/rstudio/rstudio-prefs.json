@@ -1,0 +1,8 @@
+{
+    "jobs_tab_visibility": "shown",
+    "initial_working_directory": "~",
+    "text_rendering": "geometricPrecision",
+    "font_size_points": 14,
+    "editor_theme": "Idle Fingers",
+    "posix_terminal_shell": "bash"
+}

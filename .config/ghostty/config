@@ -1,0 +1,23 @@
+# Ghostty configuration file
+
+# Font settings
+font-family = "Ubuntu Mono"
+font-size = 18
+font-thicken=true
+font-thicken-strength=1
+adjust-cell-height=1
+
+font-feature = -calt
+font-feature = -liga
+font-feature = -dlig
+
+theme = iterm2 Default
+
+# Window settings
+background-opacity = 0.95
+background-blur=10
+
+cursor-style = block
+cursor-style-blink = false
+shell-integration-features = no-cursor
+

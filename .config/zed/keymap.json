@@ -1,0 +1,34 @@
+[
+  {
+    "context": "Editor && VimControl && !VimWaiting && !menu",
+    "bindings": {
+      "space f": "file_finder::Toggle",
+      "space g": "workspace::NewSearch",
+      "space s g": "file_finder::Toggle",
+      "space s b": "tab_switcher::Toggle",
+      "space s s": "buffer_search::Deploy",
+      "space s d": "diagnostics::Deploy",
+      "space s r": "editor::FindAllReferences",
+      "space s T": "editor::GoToTypeDefinition",
+      "space s a": "editor::ToggleCodeActions",
+      "space l f": "editor::Format",
+      "space e": "workspace::ToggleLeftDock",
+      "space w": "workspace::Save",
+      "space q": "pane::CloseActiveItem",
+      "space Q": "workspace::CloseWindow",
+      "space t": "workspace::NewTerminal",
+      "space x": "pane::CloseActiveItem",
+      "space y": "editor::Copy",
+      "v a g": "editor::SelectAll",
+      "ctrl-b": "editor::ToggleBreakpoint",
+      "enter": "command_palette::Toggle",
+      "g l": "vim::EndOfLine",
+    },
+  },
+  {
+    "context": "Terminal",
+    "bindings": {
+      "escape": "workspace::ToggleBottomDock",
+    },
+  },
+]

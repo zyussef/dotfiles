@@ -1,0 +1,112 @@
+;;; init.el --- Focused, Modern Emacs Configuration
+
+;; ==========================================
+;; 1. Strip GUI Bloat
+;; ==========================================
+(setq inhibit-startup-message t)
+(scroll-bar-mode -1)        ; Disable visible scrollbar
+(tool-bar-mode -1)          ; Disable the toolbar
+(tooltip-mode -1)           ; Disable tooltips
+(set-fringe-mode 10)        ; Give some breathing room
+(menu-bar-mode -1)          ; Disable the menu bar
+
+;; ==========================================
+;; 2. Package Management (Built-in)
+;; ==========================================
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
+
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+(eval-and-compile
+  (setq use-package-always-ensure t))
+
+;; Keep auto-generated customization out of init.el
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+(when (file-exists-p custom-file)
+  (load custom-file))
+
+;; ==========================================
+;; 3. Modal Editing
+;; ==========================================
+(use-package evil
+  :init
+  (setq evil-want-integration t
+        evil-want-keybinding nil
+        evil-want-C-u-scroll t)
+  :config
+  (evil-mode 1))
+
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
+
+;; ==========================================
+;; 4. Modern Completion Stack
+;; ==========================================
+;; Vertico: Fast, minimalistic vertical minibuffer
+(use-package vertico
+  :init
+  (vertico-mode))
+
+;; Marginalia: Adds rich annotations (docstrings, file sizes) to the minibuffer
+(use-package marginalia
+  :init
+  (marginalia-mode))
+
+;; Orderless: Intuitive, fuzzy-like searching across all inputs
+(use-package orderless
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-defaults nil)
+  (completion-category-overrides '((file (styles partial-completion)))))
+
+;; Corfu: Sleek, lightweight in-buffer completion popup
+(use-package corfu
+  :custom
+  (corfu-auto t)
+  (corfu-quit-no-match 'separator)
+  :init
+  (global-corfu-mode))
+
+;; ==========================================
+;; 5. Project & File Management
+;; ==========================================
+(use-package projectile
+  :config
+  (projectile-mode 1)
+  :bind-keymap
+  ("C-c p" . projectile-command-map))
+
+(use-package magit
+  :commands magit-status)
+
+(use-package which-key
+  :init
+  (which-key-mode))
+
+;; ==========================================
+;; 6. LSP & Language Support
+;; ==========================================
+;; Eglot is the lightweight, native LSP client in Emacs 29+
+(use-package eglot
+  :ensure nil ; Built-in
+  :hook ((python-mode . eglot-ensure)
+         (python-ts-mode . eglot-ensure)
+         (svelte-mode . eglot-ensure))
+  :config
+  (add-to-list 'eglot-server-programs
+               '(svelte-mode . ("svelteserver" "--stdio"))))
+
+;; --- Python ---
+(use-package python
+  :ensure nil ; Built-in
+  :custom
+  (python-indent-offset 4))
+
+;; --- Svelte ---
+(use-package svelte-mode
+  :mode "\\.svelte\\'")

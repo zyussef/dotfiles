@@ -1,48 +1,292 @@
-vim.g.mapleader = ' '
-
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not (vim.uv or vim.loop).fs_stat(lazypath) then
-  vim.fn.system({
-    "git",
-    "clone",
-    "--filter=blob:none",
-    "https://github.com/folke/lazy.nvim.git",
-    "--branch=stable", -- latest stable release
-    lazypath,
-  })
-end
-vim.opt.rtp:prepend(lazypath)
-
-require("lazy").setup("y.plugins")
-
-vim.o.background = "dark" -- or "light" for light mode
-vim.cmd([[colorscheme gruvbox]])
-
-vim.opt.clipboard = 'unnamedplus'
+vim.cmd([[set mouse=]])
+vim.cmd([[set noswapfile]])
+vim.cmd([[hi @lsp.type.number gui=bold]])
+vim.opt.winborder = "rounded"
+vim.opt.tabstop = 2
+vim.opt.shiftwidth = 2
+vim.opt.showtabline = 2
+vim.opt.signcolumn = "yes"
+vim.opt.wrap = false
+vim.opt.cursorcolumn = false
+vim.opt.ignorecase = true
+vim.opt.smartindent = true
+vim.opt.termguicolors = true
+vim.opt.undofile = true
 vim.opt.number = true
 vim.opt.relativenumber = true
-vim.opt.expandtab = true
-vim.opt.shiftwidth = 4
-vim.opt.tabstop = 4
-vim.opt.expandtab = true
-vim.opt.shiftwidth = 4
-vim.opt.tabstop = 4
-vim.o.termguicolors = true
 
--- nvim-tree binds 
-vim.api.nvim_set_keymap('n', '<leader>e', ':NvimTreeToggle<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<C-h>', '<C-w>h', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<C-j>', '<C-w>j', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<C-k>', '<C-w>k', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<C-l>', '<C-w>l', { noremap = true, silent = true })
+vim.pack.add({
+	{ src = "https://github.com/pustota-theme/pustota.nvim" },
+	{ src = "https://github.com/nanotech/jellybeans.vim" },
+	{ src = "https://github.com/rktjmp/lush.nvim" },
+	{ src = "https://github.com/aktersnurra/no-clown-fiesta.nvim" },
+	{ src = "https://github.com/chentoast/marks.nvim" },
+	{ src = "https://github.com/stevearc/oil.nvim" },
+	{ src = "https://github.com/nvim-tree/nvim-web-devicons" },
+	{ src = "https://github.com/nvim-treesitter/nvim-treesitter" },
+	{ src = "https://github.com/aznhe21/actions-preview.nvim" },
+	{ src = "https://github.com/nvim-treesitter/nvim-treesitter-textobjects" },
+	{ src = "https://github.com/nvim-telescope/telescope.nvim" },
+	{ src = "https://github.com/nvim-telescope/telescope-ui-select.nvim" },
+	{ src = "https://github.com/nvim-lua/plenary.nvim" },
+	{ src = "https://github.com/chomosuke/typst-preview.nvim" },
+	{ src = "https://github.com/neovim/nvim-lspconfig" },
+	{ src = "https://github.com/mason-org/mason.nvim" },
+	{ src = "https://github.com/L3MON4D3/LuaSnip" },
+	{ src = "https://github.com/LinArcX/telescope-env.nvim" },
+	{ src = "https://github.com/mfussenegger/nvim-dap" },
+	{ src = "https://github.com/rcarriga/nvim-dap-ui" },
+	{ src = "https://github.com/theHamsta/nvim-dap-virtual-text" },
+	{ src = "https://github.com/julianolf/nvim-dap-lldb" },
+	{ src = "https://github.com/nvim-neotest/nvim-nio" }
+})
 
--- background transparency
-vim.api.nvim_set_hl(0, "Normal", { bg = "NONE" })
-vim.api.nvim_set_hl(0, "NvimTreeNormal", { bg = "NONE" })
+require("dap-lldb").setup()
+local dap, dapui = require("dap"), require("dapui")
 
--- telescope binds
-local builtin = require('telescope.builtin')
-vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
-vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
-vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
-vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
+dap.listeners.after.event_initialized["dapui_config"] = function()
+	dapui.open()
+end
+dap.listeners.before.event_terminated["dapui_config"] = function()
+	dapui.close()
+end
+dap.listeners.before.event_exited["dapui_config"] = function()
+	dapui.close()
+end
+
+vim.keymap.set({ 'n' }, '<Leader>d', ':DapNew<CR>')
+vim.keymap.set({ 'n', 'i' }, '<C-b>', ':DapToggleBreakpoint<CR>')
+require "marks".setup {
+	builtin_marks = { "<", ">", "^" },
+}
+
+local status_ok, treesitter_configs = pcall(require, 'nvim-treesitter.configs')
+
+if status_ok then
+  treesitter_configs.setup({
+    auto_install = true,
+    highlight = {
+      enable = true,
+    },
+  })
+end
+
+require "mason".setup()
+
+local telescope = require("telescope")
+local default_color = " zenbones"
+telescope.setup({
+	defaults = {
+		preview = { treesitter = false },
+		color_devicons = true,
+		sorting_strategy = "ascending",
+		borderchars = {
+			"", -- top
+			"", -- right
+			"", -- bottom
+			"", -- left
+			"", -- top-left
+			"", -- top-right
+			"", -- bottom-right
+			"", -- bottom-left
+		},
+		path_displays = { "smart" },
+		layout_config = {
+			height = 100,
+			width = 400,
+			prompt_position = "top",
+			preview_cutoff = 40,
+		}
+	}
+})
+telescope.load_extension("ui-select")
+
+require("actions-preview").setup {
+	backend = { "telescope" },
+	extensions = { "env" },
+	telescope = vim.tbl_extend(
+		"force",
+		require("telescope.themes").get_dropdown(), {}
+	)
+}
+
+
+
+
+vim.api.nvim_create_autocmd('LspAttach', {
+	group = vim.api.nvim_create_augroup('my.lsp', {}),
+	callback = function(args)
+		local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
+		if client:supports_method('textDocument/completion') then
+			-- Optional: trigger autocompletion on EVERY keypress. May be slow!
+			local chars = {}; for i = 32, 126 do table.insert(chars, string.char(i)) end
+			client.server_capabilities.completionProvider.triggerCharacters = chars
+			vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = true })
+		end
+	end,
+})
+
+vim.cmd [[set completeopt+=menuone,noselect,popup]]
+
+vim.lsp.enable({
+	"lua_ls", "cssls", "svelte", "tinymist",
+	"rust_analyzer", "clangd", "ruff",
+	"glsl_analyzer", "haskell-language-server", "hlint",
+	"intelephense", "tailwindcss", "ts_ls",
+	"emmet_language_server", "emmet_ls", "solargraph", "zls", "pyright"
+})
+
+require("oil").setup({
+	lsp_file_methods = {
+		enabled = true,
+		timeout_ms = 1000,
+		autosave_changes = true,
+	},
+	columns = {
+		"icon",
+	},
+	float = {
+		max_width = 0.3,
+		max_height = 0.6,
+		border = "rounded",
+	},
+})
+
+-- require "vague".setup({ transparent = true })
+require("luasnip").setup({ enable_autosnippets = true })
+require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/snippets/" })
+
+-- ~/.config/nvim/init.lua
+
+local function pack_clean()
+	local active_plugins = {}
+	local unused_plugins = {}
+
+	for _, plugin in ipairs(vim.pack.get()) do
+		active_plugins[plugin.spec.name] = plugin.active
+	end
+
+	for _, plugin in ipairs(vim.pack.get()) do
+		if not active_plugins[plugin.spec.name] then
+			table.insert(unused_plugins, plugin.spec.name)
+		end
+	end
+
+	if #unused_plugins == 0 then
+		print("No unused plugins.")
+		return
+	end
+
+	local choice = vim.fn.confirm("Remove unused plugins?", "&Yes\n&No", 2)
+	if choice == 1 then
+		vim.pack.del(unused_plugins)
+	end
+end
+
+vim.keymap.set("n", "<leader>pc", pack_clean)
+local colors = {}
+local ls = require("luasnip")
+local builtin = require("telescope.builtin")
+local map = vim.keymap.set
+local current = 1
+
+vim.g.mapleader = " "
+
+map({ "n", "x" }, "<leader>y", '"+y')
+-- map({ "n", "x" }, "<leader>d", '"+d')
+map({ "i", "s" }, "<C-e>", function() ls.expand_or_jump(1) end, { silent = true })
+map({ "i", "s" }, "<C-J>", function() ls.jump(1) end, { silent = true })
+map({ "i", "s" }, "<C-K>", function() ls.jump(-1) end, { silent = true })
+map({ "n", "t" }, "<Leader>t", "<Cmd>split<CR> <Cmd>term<CR>i")
+map({ "n", "t" }, "<Leader>x", "<Cmd>tabclose<CR>")
+
+vim.cmd([[
+	nnoremap g= g+| " g=g=g= is less awkward than g+g+g+
+	nnoremap gK @='ddkPJ'<cr>| " join lines but reversed. `@=` so [count] works
+	xnoremap gK <esc><cmd>keeppatterns '<,'>-global/$/normal! ddpkJ<cr>
+	noremap! <c-r><c-d> <c-r>=strftime('%F')<cr>
+	noremap! <c-r><c-t> <c-r>=strftime('%T')<cr>
+	noremap! <c-r><c-f> <c-r>=expand('%:t')<cr>
+	noremap! <c-r><c-p> <c-r>=expand('%:p')<cr>
+	xnoremap <expr> . "<esc><cmd>'<,'>normal! ".v:count1.'.<cr>'
+]])
+
+
+for i = 1, 8 do
+	map({ "n", "t" }, "<Leader>" .. i, "<Cmd>tabnext " .. i .. "<CR>")
+end
+
+local opts = { noremap = true, silent = true }
+vim.keymap.set("n", "yag", ":%y<CR>", opts)
+vim.keymap.set("n", "vag", "ggVG", opts)
+vim.keymap.set("n", "n", "nzzzv")
+vim.keymap.set("n", "N", "Nzzzv")
+vim.keymap.set("v", "<", "<gv", opts)
+vim.keymap.set("v", ">", ">gv", opts)
+vim.keymap.set("n", "<ESC>", ":nohlsearch<CR>", opts)
+map("n", "gl", "$", { desc = "Jump: End of line" })
+
+map({ "n", "v", "x" }, "<CR>", ":", { desc = "Self explanatory" })
+
+map({ "n", "v", "x" }, "<leader>r", ":edit!<CR>", { desc = "Reload current file" })
+map({ "n", "v", "x" }, "<leader>v", "<Cmd>edit $MYVIMRC<CR>", { desc = "Edit " .. vim.fn.expand("$MYVIMRC") })
+map({ "n", "v", "x" }, "<leader>z", "<Cmd>e ~/.config/zsh/.zshrc<CR>", { desc = "Edit .zshrc" })
+map({ "n", "v", "x" }, "<leader>n", ":norm ", { desc = "ENTER NORM COMMAND." })
+map({ "n", "v", "x" }, "<leader>o", "<Cmd>source %<CR>", { desc = "Source " .. vim.fn.expand("$MYVIMRC") })
+map({ "n", "v", "x" }, "<leader>O", "<Cmd>restart<CR>", { desc = "Restart vim." })
+map({ "n", "v", "x" }, "<C-s>", [[:s/\V]], { desc = "Enter substitue mode in selection" })
+map({ "n", "v", "x" }, "<leader>i", [[<Cmd>tabedit .gitignore<CR>]], { desc = "Enter substitue mode in selection" })
+map({ "n", "v", "x" }, "<leader>lf", vim.lsp.buf.format, { desc = "Format current buffer" })
+map({ "v", "x", "n" }, "<C-y>", '"+y', { desc = "System clipboard yank." })
+map({ "n" }, "<leader>f", builtin.find_files, { desc = "Telescope live grep" })
+
+function git_files() builtin.find_files({ no_ignore = true }) end
+
+map({ "n" }, "<leader>g", builtin.live_grep)
+map({ "n" }, "<leader>sg", git_files)
+map({ "n" }, "<leader>sb", builtin.buffers)
+map({ "n" }, "<leader>si", builtin.grep_string)
+map({ "n" }, "<leader>so", builtin.oldfiles)
+map({ "n" }, "<leader>sh", builtin.help_tags)
+map({ "n" }, "<leader>sm", builtin.man_pages)
+map({ "n" }, "<leader>G", builtin.git_commits)
+map({ "n" }, "<leader>sr", builtin.lsp_references)
+map({ "n" }, "<leader>sd", builtin.diagnostics)
+-- map({ "n" }, "<leader>si", builtin.lsp_implementations)
+map({ "n" }, "<leader>sT", builtin.lsp_type_definitions)
+map({ "n" }, "<leader>ss", builtin.current_buffer_fuzzy_find)
+map({ "n" }, "<leader>st", builtin.builtin)
+-- map({ "n" }, "<leader>sc", builtin.git_bcommits)
+map({ "n" }, "<leader>sk", builtin.keymaps)
+map({ "n" }, "<leader>se", "<cmd>Telescope env<cr>")
+map({ "n" }, "<leader>sa", require("actions-preview").code_actions)
+map({ "n" }, "<M-n>", "<cmd>resize +2<CR>")
+map({ "n" }, "<M-e>", "<cmd>resize -2<CR>")
+map({ "n" }, "<M-i>", "<cmd>vertical resize +5<CR>")
+map({ "n" }, "<M-m>", "<cmd>vertical resize -5<CR>")
+map({ "n" }, "<leader>e", "<cmd>Oil<CR>")
+map({ "n" }, "<leader>c", "1z=")
+map({ "n" }, "<C-q>", ":copen<CR>", { silent = true })
+map({ "n" }, "<leader>w", "<Cmd>update<CR>", { desc = "Write the current buffer." })
+map({ "n" }, "<leader>q", "<Cmd>:quit<CR>", { desc = "Quit the current buffer." })
+map({ "n" }, "<leader>Q", "<Cmd>:wqa<CR>", { desc = "Quit all buffers and write." })
+map({ "n" }, "<C-f>", "<Cmd>Open .<CR>", { desc = "Open current directory in Finder." })
+map({ "n" }, "<leader>a", ":edit #<CR>", { desc = "Switch to the alternate buffer" })
+map({ "t" }, "<Esc>", "<C-\\><C-n>", { desc = "Make terminal mode appear normal" })
+
+
+vim.keymap.set("n", "<C-d>", "<C-d>zz")
+vim.keymap.set("n", "<C-u>", "<C-u>zz")
+vim.keymap.set("n", "n", "nzzzv")
+vim.keymap.set("n", "N", "Nzzzv")
+
+vim.api.nvim_create_autocmd("BufWinEnter", {
+	pattern = "*.jsx,*.tsx",
+	group = vim.api.nvim_create_augroup("TS", { clear = true }),
+	callback = function()
+		vim.cmd([[set filetype=typescriptreact]])
+	end
+})
+vim.cmd.colorscheme("jellybeans")
+
+
